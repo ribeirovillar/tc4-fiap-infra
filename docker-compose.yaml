@@ -1,0 +1,152 @@
+services:
+  fiap-cliente-postgres:
+    image: postgres:16
+    container_name: fiap-cliente-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: customerdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_cliente:/var/lib/postgresql/data
+
+  fiap-cliente-service:
+    image: draraujoo/fiap-cliente-service:latest
+    container_name: fiap-cliente-service
+    depends_on:
+      - fiap-cliente-postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://fiap-cliente-postgres:5432/customerdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8080:8080"
+
+  fiap-produto-postgres:
+    image: postgres:16
+    container_name: fiap-produto-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: productdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_produto:/var/lib/postgresql/data
+
+  fiap-produto-service:
+    image: draraujoo/fiap-produto-service:latest
+    container_name: fiap-produto-service
+    depends_on:
+      - fiap-produto-postgres
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://fiap-produto-postgres:5432/productdb
+      QUARKUS_DATASOURCE_USERNAME: postgres
+      QUARKUS_DATASOURCE_PASSWORD: postgres
+      QUARKUS_HTTP_PORT: 8080
+    ports:
+      - "8081:8080"
+
+  fiap-estoque-postgres:
+    image: postgres:16
+    container_name: fiap-estoque-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stockdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata_estoque:/var/lib/postgresql/data
+
+  fiap-estoque-service:
+    image: draraujoo/fiap-estoque-service:latest
+    container_name: fiap-estoque-service
+    depends_on:
+      - fiap-estoque-postgres
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://fiap-estoque-postgres:5432/stockdb
+      QUARKUS_DATASOURCE_USERNAME: postgres
+      QUARKUS_DATASOURCE_PASSWORD: postgres
+      QUARKUS_HTTP_PORT: 8080
+    ports:
+      - "8082:8080"
+
+  rabbitmq:
+    image: rabbitmq:3.13.7-management-alpine
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  fiap-pedido-receiver:
+    image: draraujoo/fiap-pedido-receiver:latest
+    container_name: fiap-pedido-receiver
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_QUEUE_NAME: order-queue
+      RABBITMQ_QUEUE_DURABLE: true
+      SERVER_PORT: 8080
+    ports:
+      - "8083:8080"
+
+  fiap-pedido-postgres:
+    image: postgres:16
+    container_name: fiap-pedido-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orderdb
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata_pedido:/var/lib/postgresql/data
+
+  fiap-pedido-service:
+    image: draraujoo/fiap-pedido-service:latest
+    container_name: fiap-pedido-service
+    depends_on:
+      - fiap-pedido-postgres
+      - rabbitmq
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_QUEUE_NAME: order-queue
+      RABBITMQ_QUEUE_DURABLE: true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://fiap-pedido-postgres:5432/orderdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SERVER_PORT: 8080
+      FIAP_CLIENTE_SERVICE_URL: http://fiap-cliente-service:8080
+      FIAP_PRODUTO_SERVICE_URL: http://fiap-produto-service:8080
+      FIAP_ESTOQUE_SERVICE_URL: http://fiap-estoque-service:8080
+      FIAP_PAGAMENTO_SERVICE_URL: http://fiap-pagamento-service:8080
+    ports:
+      - "8084:8080"
+
+volumes:
+  pgdata_cliente:
+  pgdata_produto:
+  pgdata_estoque:
+  pgdata_pedido:
+  rabbitmq_data:
