@@ -21,6 +21,19 @@ A plataforma é baseada em microserviços, cada um com sua responsabilidade espe
 | **Pedido Service** | Spring Boot + Java | 8084 | Processamento de pedidos |
 | **Pagamento Service** | Spring Boot 3.5.4 + Java 24 | 8085 | Processamento de pagamentos |
 
+### 📂 Repositórios dos Microserviços
+
+Para desenvolvimento individual ou análise detalhada, cada serviço possui seu próprio repositório:
+
+| Serviço | Repositório |
+|---------|-------------|
+| **Cliente Service** | [tc4-fiap-cliente-service](https://github.com/ribeirovillar/tc4-fiap-cliente-service) |
+| **Produto Service** | [tc4-fiap-produto-service](https://github.com/ribeirovillar/tc4-fiap-produto-service) |
+| **Estoque Service** | [tc4-fiap-estoque-service](https://github.com/ribeirovillar/tc4-fiap-estoque-service) |
+| **Pedido Receiver** | [tc4-fiap-pedido-receiver](https://github.com/ribeirovillar/tc4-fiap-pedido-receiver) |
+| **Pedido Service** | [tc4-fiap-pedido-service](https://github.com/ribeirovillar/tc4-fiap-pedido-service) |
+| **Pagamento Service** | [tc4-fiap-pagamento-service](https://github.com/ribeirovillar/tc4-fiap-pagamento-service) |
+
 ### Infraestrutura
 
 | Componente | Porta | Descrição |
@@ -79,9 +92,19 @@ A plataforma é baseada em microserviços, cada um com sua responsabilidade espe
 | POST | `/stocks/deduct` | Baixa de estoque em lote |
 | POST | `/stocks/reverse` | Reverter baixa de estoque em lote |
 
+### 📋 Pedido Receiver (localhost:8083)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | `/orders` | Receber e encaminhar pedido para fila |
+
 ### 📋 Pedido Service (localhost:8084)
 
-Responsável pelo processamento completo de pedidos, integrando com todos os outros serviços.
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/orders` | Listar todos os pedidos |
+| GET | `/orders/{id}` | Buscar pedido por ID |
+| POST | `/payments/{id}` | Processar notificação de pagamento |
 
 ### 💳 Pagamento Service (localhost:8085)
 
