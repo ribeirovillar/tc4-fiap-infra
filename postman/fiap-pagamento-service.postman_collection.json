@@ -1,0 +1,53 @@
+{
+	"info": {
+		"_postman_id": "7a9cc302-c9c0-4211-beb3-51c7d6dd0d81",
+		"name": "fiap-pagamento-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46530133"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderId\": \"56587c59-9938-4a45-ae2d-3b0baa09615a\",\n    \"customerName\": \"Demostenis Villar\",\n    \"customerCpf\": \"06847362754\",\n    \"cardNumber\": \"4095 0394 2747 8295\",\n    \"paymentAmount\": 28148.58\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8085/payments",
+					"host": [
+						"http://localhost:8085"
+					],
+					"path": [
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8085/payments",
+					"host": [
+						"http://localhost:8085"
+					],
+					"path": [
+						"payments"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

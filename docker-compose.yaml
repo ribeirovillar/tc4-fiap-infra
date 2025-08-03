@@ -144,9 +144,35 @@ services:
     ports:
       - "8084:8080"
 
+  fiap-pagamento-postgres:
+    image: postgres:16
+    container_name: fiap-pagamento-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: paymentdb
+    ports:
+      - "5436:5432"
+    volumes:
+      - pgdata_pagamento:/var/lib/postgresql/data
+
+  fiap-pagamento-service:
+    image: draraujoo/fiap-pagamento-service:latest
+    container_name: fiap-pagamento-service
+    depends_on:
+      - fiap-pagamento-postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://fiap-pagamento-postgres:5432/paymentdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SERVER_PORT: 8080
+    ports:
+      - "8085:8080"
+
 volumes:
   pgdata_cliente:
   pgdata_produto:
   pgdata_estoque:
   pgdata_pedido:
+  pgdata_pagamento:
   rabbitmq_data:
