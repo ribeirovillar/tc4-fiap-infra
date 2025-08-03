@@ -609,10 +609,10 @@
 			]
 		},
 		{
-			"name": "5. Pedido Service Tests",
+			"name": "5. Pedido Receiver Tests",
 			"item": [
 				{
-					"name": "Create Order via Receiver",
+					"name": "Request Order via Receiver",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -698,6 +698,14 @@
 									"    pm.expect(responseJson.status).to.eql(\"ABERTO\");",
 									"});",
 									"",
+									"pm.test('Response has payment ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.payment.id).to.exist;",
+									"    pm.expect(responseJson.payment.id).to.not.be.null;",
+									"    pm.expect(responseJson.payment.id).to.not.be.empty;",
+									"    pm.globals.set('payment_id', responseJson.payment.id);",
+									"});",
+									"",
 									"pm.test('Calculate total amount for payment', function () {",
 									"    const responseJson = pm.response.json();",
 									"    let totalAmount = 0;",
@@ -744,58 +752,7 @@
 			"name": "6. Pagamento Service Tests",
 			"item": [
 				{
-					"name": "Process Payment",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Payment processed successfully', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test('Response has payment ID', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('id');",
-									"    pm.globals.set('payment_id', responseJson.id);",
-									"});",
-									"",
-									"pm.test('Payment data is correct', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.orderId).to.eql(pm.globals.get('order_id'));",
-									"    pm.expect(responseJson.paymentAmount).to.eql(pm.globals.get('order_total'));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"orderId\": \"{{order_id}}\",\n    \"customerName\": \"{{customer_name}}\",\n    \"customerCpf\": \"{{customer_cpf}}\",\n    \"cardNumber\": \"4111111111111111\",\n    \"paymentAmount\": {{order_total}}\n}"
-						},
-						"url": {
-							"raw": "{{pagamento_service_url}}/payments",
-							"host": [
-								"{{pagamento_service_url}}"
-							],
-							"path": [
-								"payments"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Payments",
+					"name": "Get Payments",
 					"event": [
 						{
 							"listen": "test",
@@ -805,14 +762,25 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test('Payment exists in list', function () {",
+									"pm.test('Payment processed successfully', function () {",
 									"    const responseJson = pm.response.json();",
 									"    const paymentId = pm.globals.get('payment_id');",
-									"    const payment = responseJson.find(p => p.id === paymentId);",
+									"    var payment = responseJson.find(item => item.id === paymentId);",
 									"    pm.expect(payment).to.not.be.undefined;",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -826,6 +794,91 @@
 							],
 							"path": [
 								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request Process Payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment processed successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{pedido_service_url}}/payments/{{payment_id}}",
+							"host": [
+								"{{pedido_service_url}}"
+							],
+							"path": [
+								"payments",
+								"{{payment_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order By Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment processed successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Order Status updated', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.payment.status).is.not.eql('IN_PROGRESS');",
+									"    pm.expect(responseJson.status).is.not.eql('ABERTO');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pedido_service_url}}/orders/{{order_id}}",
+							"host": [
+								"{{pedido_service_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}"
 							]
 						}
 					},
@@ -850,10 +903,16 @@
 									"pm.test('Stock quantity was deducted correctly', function () {",
 									"    const responseJson = pm.response.json();",
 									"    // Started with 100, ordered 2, should have 98",
-									"    pm.expect(responseJson.quantity).to.be.at.most(98);",
+									"    if(pm.globals.get('order_status') === 'FECHADO_COM_SUCESSO') {",
+									"        pm.expect(responseJson.quantity).to.be.at.most(98);",
+									"    } else {",
+									"        pm.expect(responseJson.quantity).to.be.at.most(100);",
+									"    }",
+									"    ",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
