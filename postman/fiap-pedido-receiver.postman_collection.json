@@ -1,0 +1,36 @@
+{
+	"info": {
+		"_postman_id": "e6a6bcf6-c457-4095-867c-d4c1c8151829",
+		"name": "fiap-pedido-receiver",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46530133"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerId\": \"f2c601bd-4dcd-4504-821b-4c7258626503\",\n    \"items\": [\n        {\n            \"sku\": \"HP40739\",\n            \"quantity\": 5\n        },\n        {\n            \"sku\": \"SGT83564\",\n            \"quantity\": 6\n        },\n        {\n            \"sku\": \"SAM24906\",\n            \"quantity\": 7\n        }\n    ],\n    \"cardNumber\": \"4095 0394 2747 8295\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost{{url_pedido_receiver_port}}/orders",
+					"host": [
+						"http://localhost{{url_pedido_receiver_port}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
