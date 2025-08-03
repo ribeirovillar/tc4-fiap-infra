@@ -1,0 +1,1209 @@
+{
+	"info": {
+		"_postman_id": "1853eee9-f812-4992-be79-17ada265c529",
+		"name": "FIAP - Regression Tests Suite",
+		"description": "Coleção completa de testes de regressão para toda a plataforma de pedidos FIAP TC4",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46530133"
+	},
+	"item": [
+		{
+			"name": "0. Setup - Generate Unique Data",
+			"item": [
+				{
+					"name": "Generate Test Data",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate unique timestamp for this test run",
+									"const timestamp = Date.now();",
+									"const random = Math.floor(Math.random() * 1000);",
+									"",
+									"// Generate unique customer data",
+									"pm.globals.set('test_timestamp', timestamp);",
+									"pm.globals.set('customer_name', `João Silva ${timestamp}`);",
+									"",
+									"// Generate a completely random and unique CPF",
+									"function generateUniqueCPF() {",
+									"    const timestamp = Date.now().toString();",
+									"    const random = Math.floor(Math.random() * 999999).toString().padStart(6, '0');",
+									"    // Use last 5 digits of timestamp + 6 random digits = 11 digits total",
+									"    const cpfBase = timestamp.slice(-5) + random;",
+									"    return cpfBase.slice(0, 11);",
+									"}",
+									"",
+									"const uniqueCPF = generateUniqueCPF();",
+									"pm.globals.set('customer_cpf', uniqueCPF);",
+									"",
+									"// Generate unique product SKUs",
+									"pm.globals.set('product1_sku', `CAFE${timestamp}`);",
+									"pm.globals.set('product2_sku', `ACUCAR${timestamp}`);",
+									"",
+									"// Generate unique product names",
+									"pm.globals.set('product1_name', `Café Premium ${timestamp}`);",
+									"pm.globals.set('product2_name', `Açúcar Cristal ${timestamp}`);",
+									"",
+									"console.log('=== Test Data Generated ===');",
+									"console.log('Timestamp:', timestamp);",
+									"console.log('Customer Name:', pm.globals.get('customer_name'));",
+									"console.log('Customer CPF:', pm.globals.get('customer_cpf'));",
+									"console.log('Product 1 SKU:', pm.globals.get('product1_sku'));",
+									"console.log('Product 2 SKU:', pm.globals.get('product2_sku'));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test data generated successfully', function () {",
+									"    pm.expect(pm.globals.get('test_timestamp')).to.not.be.undefined;",
+									"    pm.expect(pm.globals.get('customer_name')).to.not.be.undefined;",
+									"    pm.expect(pm.globals.get('customer_cpf')).to.not.be.undefined;",
+									"});",
+									"",
+									"pm.test('CPF has correct length', function () {",
+									"    const cpf = pm.globals.get('customer_cpf');",
+									"    pm.expect(cpf).to.have.lengthOf(11);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{cliente_service_url}}/customers",
+							"host": [
+								"{{cliente_service_url}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "1. Setup - Service Connectivity",
+			"item": [
+				{
+					"name": "Check Cliente Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Cliente Service is accessible', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{cliente_service_url}}/customers",
+							"host": [
+								"{{cliente_service_url}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Produto Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Produto Service is accessible', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{produto_service_url}}/products",
+							"host": [
+								"{{produto_service_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Estoque Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Estoque Service is accessible', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Pedido Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Pedido Service is accessible', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pedido_service_url}}/orders",
+							"host": [
+								"{{pedido_service_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Pagamento Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Pagamento Service is accessible', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pagamento_service_url}}/payments",
+							"host": [
+								"{{pagamento_service_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Cliente Service Tests",
+			"item": [
+				{
+					"name": "Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Customer created successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has customer ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.globals.set('customer_id', responseJson.id);",
+									"});",
+									"",
+									"pm.test('Customer data is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.fullName).to.eql(pm.globals.get('customer_name'));",
+									"    pm.expect(responseJson.cpf).to.eql(pm.globals.get('customer_cpf'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"{{customer_name}}\",\n    \"cpf\": \"{{customer_cpf}}\",\n    \"birthDate\": \"1990-05-15\",\n    \"address\": {\n        \"street\": \"Rua das Flores\",\n        \"number\": \"123\",\n        \"city\": \"São Paulo\",\n        \"state\": \"SP\",\n        \"zipCode\": \"01234-567\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{cliente_service_url}}/customers",
+							"host": [
+								"{{cliente_service_url}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Customer retrieved successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Customer data matches created customer', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.eql(pm.globals.get('customer_id'));",
+									"    pm.expect(responseJson.fullName).to.eql(pm.globals.get('customer_name'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{cliente_service_url}}/customers/{{customer_id}}",
+							"host": [
+								"{{cliente_service_url}}"
+							],
+							"path": [
+								"customers",
+								"{{customer_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Produto Service Tests",
+			"item": [
+				{
+					"name": "Create Product 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Product 1 created successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has product ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.globals.set('product1_id', responseJson.id);",
+									"});",
+									"",
+									"pm.test('Product data is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.name).to.eql(pm.globals.get('product1_name'));",
+									"    pm.expect(responseJson.sku).to.eql(pm.globals.get('product1_sku'));",
+									"    pm.expect(responseJson.price).to.eql(25.50);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{product1_name}}\",\n    \"sku\": \"{{product1_sku}}\",\n    \"price\": 25.50\n}"
+						},
+						"url": {
+							"raw": "{{produto_service_url}}/products",
+							"host": [
+								"{{produto_service_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Product 2 created successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has product ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.globals.set('product2_id', responseJson.id);",
+									"});",
+									"",
+									"pm.test('Product data is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.name).to.eql(pm.globals.get('product2_name'));",
+									"    pm.expect(responseJson.sku).to.eql(pm.globals.get('product2_sku'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{product2_name}}\",\n    \"sku\": \"{{product2_sku}}\",\n    \"price\": 4.99\n}"
+						},
+						"url": {
+							"raw": "{{produto_service_url}}/products",
+							"host": [
+								"{{produto_service_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Products retrieved successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('At least 2 products exist', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.length).to.be.at.least(2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{produto_service_url}}/products",
+							"host": [
+								"{{produto_service_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Estoque Service Tests",
+			"item": [
+				{
+					"name": "Create Stock for Product 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Stock created successfully for Product 1', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Stock data is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.productId).to.eql(pm.globals.get('product1_id'));",
+									"    pm.expect(responseJson.quantity).to.eql(100);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{product1_id}}\",\n    \"quantity\": 100\n}"
+						},
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Stock for Product 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Stock created successfully for Product 2', function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{product2_id}}\",\n    \"quantity\": 50\n}"
+						},
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Stock for Product 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Stock retrieved successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Stock quantity is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.quantity).to.eql(100);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks/products/{{product1_id}}",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks",
+								"products",
+								"{{product1_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Pedido Service Tests",
+			"item": [
+				{
+					"name": "Create Order via Receiver",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a UUID for cardNumber",
+									"const { v4: uuidv4 } = require('uuid');",
+									"const cardNumber = uuidv4();",
+									"pm.globals.set('card_number', cardNumber);",
+									"console.log('Generated Card Number:', cardNumber);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Order sent to receiver successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has order ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('orderId');",
+									"    pm.globals.set('order_id', responseJson.orderId);",
+									"});",
+									"",
+									"pm.test('Order data is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.customerId).to.eql(pm.globals.get('customer_id'));",
+									"    pm.expect(responseJson.items).to.have.lengthOf(2);",
+									"});",
+									"",
+									"// Wait a bit for async processing",
+									"setTimeout(function(){}, 2000);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"{{customer_id}}\",\n    \"cardNumber\": \"{{card_number}}\",\n    \"items\": [\n        {\n            \"sku\": \"{{product1_sku}}\",\n            \"quantity\": 2\n        },\n        {\n            \"sku\": \"{{product2_sku}}\",\n            \"quantity\": 1\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{pedido_receiver_url}}/orders",
+							"host": [
+								"{{pedido_receiver_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID from Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Order retrieved successfully from service', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Order data matches created order', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.eql(pm.globals.get('order_id'));",
+									"    pm.expect(responseJson.customer.id).to.eql(pm.globals.get('customer_id'));",
+									"    pm.expect(responseJson.status).to.eql(\"ABERTO\");",
+									"});",
+									"",
+									"pm.test('Calculate total amount for payment', function () {",
+									"    const responseJson = pm.response.json();",
+									"    let totalAmount = 0;",
+									"    responseJson.items.forEach(item => {",
+									"        totalAmount += item.quantity * item.price;",
+									"    });",
+									"    pm.globals.set('order_total', totalAmount);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pedido_service_url}}/orders/{{order_id}}",
+							"host": [
+								"{{pedido_service_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Pagamento Service Tests",
+			"item": [
+				{
+					"name": "Process Payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment processed successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has payment ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.globals.set('payment_id', responseJson.id);",
+									"});",
+									"",
+									"pm.test('Payment data is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.orderId).to.eql(pm.globals.get('order_id'));",
+									"    pm.expect(responseJson.paymentAmount).to.eql(pm.globals.get('order_total'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"orderId\": \"{{order_id}}\",\n    \"customerName\": \"{{customer_name}}\",\n    \"customerCpf\": \"{{customer_cpf}}\",\n    \"cardNumber\": \"4111111111111111\",\n    \"paymentAmount\": {{order_total}}\n}"
+						},
+						"url": {
+							"raw": "{{pagamento_service_url}}/payments",
+							"host": [
+								"{{pagamento_service_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Payments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payments retrieved successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Payment exists in list', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const paymentId = pm.globals.get('payment_id');",
+									"    const payment = responseJson.find(p => p.id === paymentId);",
+									"    pm.expect(payment).to.not.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{pagamento_service_url}}/payments",
+							"host": [
+								"{{pagamento_service_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Stock Deduction Tests",
+			"item": [
+				{
+					"name": "Verify Stock After Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Stock retrieved successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Stock quantity was deducted correctly', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // Started with 100, ordered 2, should have 98",
+									"    pm.expect(responseJson.quantity).to.be.at.most(98);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks/products/{{product1_id}}",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks",
+								"products",
+								"{{product1_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Integration Tests",
+			"item": [
+				{
+					"name": "Test Product SKU Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Products retrieved by SKU successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Correct products returned', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.lengthOf(2);",
+									"    const skus = responseJson.map(p => p.sku);",
+									"    pm.expect(skus).to.include(pm.globals.get('product1_sku'));",
+									"    pm.expect(skus).to.include(pm.globals.get('product2_sku'));",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{produto_service_url}}/products/skus?sku={{product1_sku}}&sku={{product2_sku}}",
+							"host": [
+								"{{produto_service_url}}"
+							],
+							"path": [
+								"products",
+								"skus"
+							],
+							"query": [
+								{
+									"key": "sku",
+									"value": "{{product1_sku}}"
+								},
+								{
+									"key": "sku",
+									"value": "{{product2_sku}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Bulk Stock Deduction",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Bulk stock deduction successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"productId\": \"{{product1_id}}\",\n        \"quantity\": 1\n    },\n    {\n        \"productId\": \"{{product2_id}}\",\n        \"quantity\": 1\n    }\n]"
+						},
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks/deduct",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks",
+								"deduct"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "9. Cleanup Tests",
+			"item": [
+				{
+					"name": "Delete Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Customer deleted successfully', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{cliente_service_url}}/customers/{{customer_id}}",
+							"host": [
+								"{{cliente_service_url}}"
+							],
+							"path": [
+								"customers",
+								"{{customer_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Product 1 deleted successfully', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{produto_service_url}}/products/{{product1_id}}",
+							"host": [
+								"{{produto_service_url}}"
+							],
+							"path": [
+								"products",
+								"{{product1_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Product 2 deleted successfully', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{produto_service_url}}/products/{{product2_id}}",
+							"host": [
+								"{{produto_service_url}}"
+							],
+							"path": [
+								"products",
+								"{{product2_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Stock Product 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Product 2 deleted successfully', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks/products/{{product1_id}}",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks",
+								"products",
+								"{{product1_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Stock Product 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Product 2 deleted successfully', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{estoque_service_url}}/stocks/products/{{product2_id}}",
+							"host": [
+								"{{estoque_service_url}}"
+							],
+							"path": [
+								"stocks",
+								"products",
+								"{{product2_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log('Starting test execution for: ' + pm.info.requestName);",
+					"console.log('Test timestamp: ' + pm.globals.get('test_timestamp'));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script",
+					"pm.test('Response time is less than 5000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"if (pm.request.method !== 'DELETE' && pm.response.text().length > 0) {",
+					"    pm.test('Response is JSON', function () {",
+					"        pm.response.to.be.json;",
+					"    });",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "cliente_service_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "produto_service_url",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "estoque_service_url",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "pedido_service_url",
+			"value": "http://localhost:8084",
+			"type": "string"
+		},
+		{
+			"key": "pagamento_service_url",
+			"value": "http://localhost:8085",
+			"type": "string"
+		},
+		{
+			"key": "pedido_receiver_url",
+			"value": "http://localhost:8083",
+			"type": "string"
+		}
+	]
+}

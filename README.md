@@ -160,21 +160,37 @@ Na pasta `postman/` você encontra coleções pré-configuradas para cada servi�
 - `fiap-pedido-receiver.postman_collection.json`
 - `fiap-pedido-service.postman_collection.json`
 - `fiap-pagamento-service.postman_collection.json`
+- `fiap-regression-tests.postman_collection.json` ⭐ **Suite completa de testes de regressão**
 
-### Importar no Postman
+### Suite de Testes de Regressão
 
-1. Abra o Postman
-2. Clique em "Import"
-3. Selecione os arquivos JSON da pasta `postman/`
-4. Configure o environment com as URLs base dos serviços
+A coleção `fiap-regression-tests.postman_collection.json` é uma suite completa que executa um fluxo end-to-end da plataforma:
 
-### Fluxo de Teste Completo
+#### 🔍 **Estrutura dos Testes:**
 
-1. **Criar Cliente** (porta 8080)
-2. **Criar Produtos** (porta 8081)
-3. **Configurar Estoque** (porta 8082)
-4. **Criar Pedido** (porta 8084)
-5. **Processar Pagamento** (porta 8085)
+1. **Service Connectivity** - Verifica se todos os serviços estão acessíveis
+2. **Cliente Service** - Cria e valida cliente
+3. **Produto Service** - Cria produtos para o teste
+4. **Estoque Service** - Configura estoque dos produtos
+5. **Pedido Service** - Cria pedido completo
+6. **Pagamento Service** - Processa pagamento do pedido
+7. **Validações** - Verifica baixa de estoque e integrações
+8. **Limpeza** - Remove dados criados durante o teste
+
+#### ✅ **Recursos da Suite:**
+
+- **Testes Automatizados**: Cada request tem validações automáticas
+- **Variáveis Dinâmicas**: IDs são capturados e reutilizados automaticamente
+- **Validações de Performance**: Tempo de resposta < 5 segundos
+- **Fluxo Completo**: Simula um processo real de e-commerce
+- **Cleanup**: Remove dados de teste ao final
+
+#### 🚀 **Como Executar:**
+
+1. Importe a coleção no Postman
+2. Certifique-se que todos os serviços estão rodando
+3. Execute a coleção completa com "Run Collection"
+4. Acompanhe os resultados em tempo real
 
 ---
 
